@@ -1,0 +1,7 @@
+Hive data warehouse (world historical data data already genreated)
+HQL hive query language
+OLAP online analytical processing - already generated data load the data top of the
+OLTP online transaction processing - real time insert random insert rando update
+
+ 
+

@@ -1,0 +1,1084 @@
+
+
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ 
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop 
+Usage: hadoop [--config confdir] COMMAND
+where COMMAND is one of:
+  namenode -format     format the DFS filesystem
+  secondarynamenode    run the DFS secondary namenode
+  namenode             run the DFS namenode
+  datanode             run a DFS datanode
+  dfsadmin             run a DFS admin client
+  mradmin              run a Map-Reduce admin client
+  fsck                 run a DFS filesystem checking utility
+  fs                   run a generic filesystem user client
+  balancer             run a cluster balancing utility
+  oiv                  apply the offline fsimage viewer to an fsimage
+  fetchdt              fetch a delegation token from the NameNode
+  jobtracker           run the MapReduce job Tracker node
+  pipes                run a Pipes job
+  tasktracker          run a MapReduce task Tracker node
+  historyserver        run job history servers as a standalone daemon
+  job                  manipulate MapReduce jobs
+  queue                get information regarding JobQueues
+  version              print the version
+  jar <jar>            run a jar file
+  distcp <srcurl> <desturl> copy file or directories recursively
+  distcp2 <srcurl> <desturl> DistCp version 2
+  archive -archiveName NAME -p <parent path> <src>* <dest> create a hadoop archive
+  classpath            prints the class path needed to get the
+                       Hadoop jar and the required libraries
+  daemonlog            get/set the log level for each daemon
+ or
+  CLASSNAME            run the class named CLASSNAME
+Most commands print help when invoked w/o parameters.
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop oiv 
+Usage: bin/hadoop oiv [OPTIONS] -i INPUTFILE -o OUTPUTFILE
+Offline Image Viewer
+View a Hadoop fsimage INPUTFILE using the specified PROCESSOR,
+saving the results in OUTPUTFILE.
+
+The oiv utility will attempt to parse correctly formed image files
+and will abort fail with mal-formed image files.
+
+The tool works offline and does not require a running cluster in
+order to process an image file.
+
+The following image processors are available:
+  * Ls: The default image processor generates an lsr-style listing
+    of the files in the namespace, with the same fields in the same
+    order.  Note that in order to correctly determine file sizes,
+    this formatter cannot skip blocks and will override the
+    -skipBlocks option.
+  * Indented: This processor enumerates over all of the elements in
+    the fsimage file, using levels of indentation to delineate
+    sections within the file.
+  * Delimited: Generate a text file with all of the elements common
+    to both inodes and inodes-under-construction, separated by a
+    delimiter. The default delimiter is , though this may be
+    changed via the -delimiter argument. This processor also overrides
+    the -skipBlocks option for the same reason as the Ls processor
+  * XML: This processor creates an XML document with all elements of
+    the fsimage enumerated, suitable for further analysis by XML
+    tools.
+  * FileDistribution: This processor analyzes the file size
+    distribution in the image.
+    -maxSize specifies the range [0, maxSize] of file sizes to be
+     analyzed (128GB by default).
+    -step defines the granularity of the distribution. (2MB by default)
+  * NameDistribution: This processor analyzes the file names
+    in the image and prints total number of file names and how frequently    file names are reused.
+
+Required command line arguments:
+-i,--inputFile <arg>   FSImage file to process.
+-o,--outputFile <arg>  Name of output file. If the specified
+                       file exists, it will be overwritten.
+
+Optional command line arguments:
+-p,--processor <arg>   Select which type of processor to apply
+                       against image file. (Ls|XML|Delimited|Indented|FileDistribution).
+-h,--help              Display usage information and exit
+-printToScreen         For processors that write to a file, also
+                       output to screen. On large image files this
+                       will dramatically increase processing time.
+-skipBlocks            Skip inodes' blocks information. May
+                       significantly decrease output.
+                       (default = false).
+-delimiter <arg>       Delimiting string to use with Delimited processor
+
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltr
+total 1040
+-rw-r--r-- 1 hduser hadoop    2412 May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop       8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop     100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop 1048580 May  1 10:02 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop oiv -i fsimage -o fsimage.txt
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltr
+total 1044
+-rw-r--r-- 1 hduser hadoop    2412 May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop       8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop     100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop 1048580 May  1 10:02 edits
+-rw-r--r-- 1 hduser hadoop    2186 May  1 10:14 fsimage.txt
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -cat fsimage.txt
+cat: File does not exist: /user/hduser/fsimage.txt
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ cat fsimage.txt
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:26 /
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:55 /AVD
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:23 /aj
+drwxr-xr-x  -   hduser supergroup          0 2022-04-28 20:21 /app
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:26 /avd2
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 04:25 /tron
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /user
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:14 /AVD/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:23 /aj/samplefile1
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:25 /app/hadoop
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:26 /app/hadoop/tmp
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred
+drwxr-xr-x  -   hduser supergroup          0 2022-04-28 20:21 /app/hadoop/tmp/mapred/staging
+drwx------  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred/system
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred/staging/hduser
+drwx------  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred/staging/hduser/.staging
+-rw-------  1   hduser supergroup          4 2022-05-01 06:36 /app/hadoop/tmp/mapred/system/jobtracker.info
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /user/hduser
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 06:20 /user/hduser/.Trash
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 04:32 /user/hduser/AVD
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:15 /user/hduser/aj
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:41 /user/hduser/avd
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:17 /user/hduser/go
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:17 /user/hduser/tron
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 04:32 /user/hduser/AVD/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:15 /user/hduser/aj/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 04:35 /user/hduser/go/samplefile1
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop jar hadoop-examples-1.2.1.jar pi 3
+Not a valid JAR: /app/hadoop/tmp/dfs/name/current/hadoop-examples-1.2.1.jar
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop jar hadoop-examples-1.2.1.jar pi 3 3
+Not a valid JAR: /app/hadoop/tmp/dfs/name/current/hadoop-examples-1.2.1.jar
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltr
+total 1044
+-rw-r--r-- 1 hduser hadoop    2412 May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop       8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop     100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop 1048580 May  1 10:02 edits
+-rw-r--r-- 1 hduser hadoop    2186 May  1 10:14 fsimage.txt
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ cd ../..
+hduser@ubuntu:/app/hadoop/tmp/dfs$ ls -ltr
+total 12
+drwxr-xr-x 5 hduser hadoop 4096 May  1 06:21 name
+drwxr-xr-x 6 hduser hadoop 4096 May  1 06:36 data
+drwxr-xr-x 4 hduser hadoop 4096 May  1 09:46 namesecondary
+hduser@ubuntu:/app/hadoop/tmp/dfs$ cd namesecondary/
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary$ ls -ltr
+total 8
+drwxr-xr-x 2 hduser hadoop 4096 Apr 22 04:13 image
+-rw-r--r-- 1 hduser hadoop    0 May  1 06:21 in_use.lock
+drwxr-xr-x 2 hduser hadoop 4096 May  1 09:46 current
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary$ cd current/
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary/current$ ls -ltr
+total 16
+-rw-r--r-- 1 hduser hadoop 2412 May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop    4 May  1 09:46 edits
+-rw-r--r-- 1 hduser hadoop  100 May  1 09:46 VERSION
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary/current$ cd ../..
+hduser@ubuntu:/app/hadoop/tmp/dfs$ ls -ltr
+total 12
+drwxr-xr-x 5 hduser hadoop 4096 May  1 06:21 name
+drwxr-xr-x 6 hduser hadoop 4096 May  1 06:36 data
+drwxr-xr-x 4 hduser hadoop 4096 May  1 09:46 namesecondary
+hduser@ubuntu:/app/hadoop/tmp/dfs$ cd ..
+hduser@ubuntu:/app/hadoop/tmp$ ls -ltr
+total 8
+drwxr-xr-x 5 hduser hadoop 4096 Apr 22 04:02 dfs
+drwxr-xr-x 3 hduser hadoop 4096 Apr 22 04:02 mapred
+hduser@ubuntu:/app/hadoop/tmp$ cd ..
+hduser@ubuntu:/app/hadoop$ ls -ltr
+total 4
+drwxrwxrwx 4 hduser hadoop 4096 May  1 07:00 tmp
+hduser@ubuntu:/app/hadoop$ ls -ltr
+total 4
+drwxrwxrwx 4 hduser hadoop 4096 May  1 07:00 tmp
+hduser@ubuntu:/app/hadoop$ cd ../..
+hduser@ubuntu:/$ cd
+hduser@ubuntu:~$ cd /usr/local
+hduser@ubuntu:/usr/local$ ls -ltr
+total 62392
+-rw-r--r--  1 root   root   63851630 Nov  6  2014 hadoop-1.2.1.tar.gz
+drwxr-xr-x  2 root   root       4096 Feb 23 00:47 src
+drwxr-xr-x  2 root   root       4096 Feb 23 00:47 sbin
+drwxr-xr-x  2 root   root       4096 Feb 23 00:47 include
+drwxr-xr-x  2 root   root       4096 Feb 23 00:47 games
+drwxr-xr-x  2 root   root       4096 Feb 23 00:47 etc
+drwxr-xr-x  2 root   root       4096 Feb 23 00:47 bin
+drwxr-xr-x  3 root   root       4096 Feb 23 00:47 lib
+drwxr-xr-x  7 root   root       4096 Feb 23 00:50 share
+lrwxrwxrwx  1 root   root          9 Apr 22 01:38 man -> share/man
+drwxr-xr-x 16 hduser hadoop     4096 Apr 22 04:02 hadoop
+hduser@ubuntu:/usr/local$ cd hadoop
+hduser@ubuntu:/usr/local/hadoop$ ls -ltr
+total 8392
+drwxr-xr-x  3 hduser hadoop    4096 Jul 22  2013 share
+drwxr-xr-x 10 hduser hadoop    4096 Jul 22  2013 contrib
+drwxr-xr-x  9 hduser hadoop    4096 Jul 22  2013 webapps
+-rw-rw-r--  1 hduser hadoop  385634 Jul 22  2013 hadoop-tools-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop 3126576 Jul 22  2013 hadoop-test-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop     417 Jul 22  2013 hadoop-minicluster-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop  142726 Jul 22  2013 hadoop-examples-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop 4203147 Jul 22  2013 hadoop-core-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop     414 Jul 22  2013 hadoop-client-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop    6842 Jul 22  2013 hadoop-ant-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop    1366 Jul 22  2013 README.txt
+-rw-rw-r--  1 hduser hadoop     101 Jul 22  2013 NOTICE.txt
+-rw-rw-r--  1 hduser hadoop   13366 Jul 22  2013 LICENSE.txt
+-rw-rw-r--  1 hduser hadoop   10525 Jul 22  2013 ivy.xml
+-rw-rw-r--  1 hduser hadoop  493744 Jul 22  2013 CHANGES.txt
+drwxr-xr-x  4 hduser hadoop    4096 Jul 22  2013 c++
+-rw-rw-r--  1 hduser hadoop  121130 Jul 22  2013 build.xml
+drwxr-xr-x  6 hduser hadoop    4096 Apr 22 03:28 docs
+drwxr-xr-x  2 hduser hadoop    4096 Apr 22 03:28 ivy
+drwxr-xr-x  5 hduser hadoop    4096 Apr 22 03:28 lib
+drwxr-xr-x 16 hduser hadoop    4096 Apr 22 03:28 src
+drwxr-xr-x  2 hduser hadoop    4096 Apr 22 03:28 libexec
+drwxr-xr-x  2 hduser hadoop    4096 Apr 22 03:28 bin
+drwxr-xr-x  2 hduser hadoop    4096 Apr 22 03:28 sbin
+drwxr-xr-x  2 hduser hadoop    4096 May  1 06:35 conf
+drwxr-xr-x  4 hduser hadoop    4096 May  1 10:01 logs
+
+
+hduser@ubuntu:/usr/local/hadoop$ hadoop jar hadoop-examples-1.2.1.jar pi 3 3
+Number of Maps  = 3
+Samples per Map = 3
+Wrote input for Map #0
+Wrote input for Map #1
+Wrote input for Map #2
+Starting Job
+22/05/01 10:34:41 INFO mapred.FileInputFormat: Total input paths to process : 3
+22/05/01 10:34:42 INFO mapred.JobClient: Running job: job_202205010621_0002
+22/05/01 10:34:43 INFO mapred.JobClient:  map 0% reduce 0%
+22/05/01 10:34:51 INFO mapred.JobClient:  map 33% reduce 0%
+22/05/01 10:34:52 INFO mapred.JobClient:  map 66% reduce 0%
+22/05/01 10:34:58 INFO mapred.JobClient:  map 100% reduce 0%
+22/05/01 10:35:03 INFO mapred.JobClient:  map 100% reduce 33%
+22/05/01 10:35:04 INFO mapred.JobClient:  map 100% reduce 100%
+22/05/01 10:35:06 INFO mapred.JobClient: Job complete: job_202205010621_0002
+22/05/01 10:35:06 INFO mapred.JobClient: Counters: 30
+22/05/01 10:35:06 INFO mapred.JobClient:   Map-Reduce Framework
+22/05/01 10:35:06 INFO mapred.JobClient:     Spilled Records=12
+22/05/01 10:35:06 INFO mapred.JobClient:     Map output materialized bytes=84
+22/05/01 10:35:06 INFO mapred.JobClient:     Reduce input records=6
+22/05/01 10:35:06 INFO mapred.JobClient:     Virtual memory (bytes) snapshot=7332442112
+22/05/01 10:35:06 INFO mapred.JobClient:     Map input records=3
+22/05/01 10:35:06 INFO mapred.JobClient:     SPLIT_RAW_BYTES=372
+22/05/01 10:35:06 INFO mapred.JobClient:     Map output bytes=54
+22/05/01 10:35:06 INFO mapred.JobClient:     Reduce shuffle bytes=84
+22/05/01 10:35:06 INFO mapred.JobClient:     Physical memory (bytes) snapshot=645279744
+22/05/01 10:35:06 INFO mapred.JobClient:     Map input bytes=72
+22/05/01 10:35:06 INFO mapred.JobClient:     Reduce input groups=6
+22/05/01 10:35:06 INFO mapred.JobClient:     Combine output records=0
+22/05/01 10:35:06 INFO mapred.JobClient:     Reduce output records=0
+22/05/01 10:35:06 INFO mapred.JobClient:     Map output records=6
+22/05/01 10:35:06 INFO mapred.JobClient:     Combine input records=0
+22/05/01 10:35:06 INFO mapred.JobClient:     CPU time spent (ms)=3080
+22/05/01 10:35:06 INFO mapred.JobClient:     Total committed heap usage (bytes)=503316480
+22/05/01 10:35:06 INFO mapred.JobClient:   File Input Format Counters 
+22/05/01 10:35:06 INFO mapred.JobClient:     Bytes Read=354
+22/05/01 10:35:06 INFO mapred.JobClient:   FileSystemCounters
+22/05/01 10:35:06 INFO mapred.JobClient:     HDFS_BYTES_READ=726
+22/05/01 10:35:06 INFO mapred.JobClient:     FILE_BYTES_WRITTEN=219678
+22/05/01 10:35:06 INFO mapred.JobClient:     FILE_BYTES_READ=72
+22/05/01 10:35:06 INFO mapred.JobClient:     HDFS_BYTES_WRITTEN=215
+22/05/01 10:35:06 INFO mapred.JobClient:   File Output Format Counters 
+22/05/01 10:35:06 INFO mapred.JobClient:     Bytes Written=97
+22/05/01 10:35:06 INFO mapred.JobClient:   Job Counters 
+22/05/01 10:35:06 INFO mapred.JobClient:     Launched map tasks=3
+22/05/01 10:35:06 INFO mapred.JobClient:     Launched reduce tasks=1
+22/05/01 10:35:06 INFO mapred.JobClient:     SLOTS_MILLIS_REDUCES=13036
+22/05/01 10:35:06 INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0
+22/05/01 10:35:06 INFO mapred.JobClient:     SLOTS_MILLIS_MAPS=20232
+22/05/01 10:35:06 INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0
+22/05/01 10:35:06 INFO mapred.JobClient:     Data-local map tasks=3
+Job Finished in 24.914 seconds
+java.lang.ArithmeticException: Non-terminating decimal expansion; no exact representable decimal result.
+	at java.math.BigDecimal.divide(BigDecimal.java:1693)
+	at org.apache.hadoop.examples.PiEstimator.estimate(PiEstimator.java:313)
+	at org.apache.hadoop.examples.PiEstimator.run(PiEstimator.java:342)
+	at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:65)
+	at org.apache.hadoop.examples.PiEstimator.main(PiEstimator.java:351)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.hadoop.util.ProgramDriver$ProgramDescription.invoke(ProgramDriver.java:68)
+	at org.apache.hadoop.util.ProgramDriver.driver(ProgramDriver.java:139)
+	at org.apache.hadoop.examples.ExampleDriver.main(ExampleDriver.java:64)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.hadoop.util.RunJar.main(RunJar.java:160)
+hduser@ubuntu:/usr/local/hadoop$ cd /app/hadoop
+hduser@ubuntu:/app/hadoop$ ls -ltr
+total 4
+drwxrwxrwx 4 hduser hadoop 4096 May  1 10:35 tmp
+hduser@ubuntu:/app/hadoop$ cd tmp/
+hduser@ubuntu:/app/hadoop/tmp$ ls -ltr
+total 8
+drwxr-xr-x 5 hduser hadoop 4096 Apr 22 04:02 dfs
+drwxr-xr-x 3 hduser hadoop 4096 Apr 22 04:02 mapred
+hduser@ubuntu:/app/hadoop/tmp$ cd dfs/
+hduser@ubuntu:/app/hadoop/tmp/dfs$ ls -ltr
+total 12
+drwxr-xr-x 5 hduser hadoop 4096 May  1 06:21 name
+drwxr-xr-x 6 hduser hadoop 4096 May  1 06:36 data
+drwxr-xr-x 4 hduser hadoop 4096 May  1 09:46 namesecondary
+hduser@ubuntu:/app/hadoop/tmp/dfs$ cd namesecondary/
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary$ ls -ltr
+total 8
+drwxr-xr-x 2 hduser hadoop 4096 Apr 22 04:13 image
+-rw-r--r-- 1 hduser hadoop    0 May  1 06:21 in_use.lock
+drwxr-xr-x 2 hduser hadoop 4096 May  1 09:46 current
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary$ cd current/
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary/current$ ls -ltr
+total 16
+-rw-r--r-- 1 hduser hadoop 2412 May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop    4 May  1 09:46 edits
+-rw-r--r-- 1 hduser hadoop  100 May  1 09:46 VERSION
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary/current$ ls -ltr
+total 16
+-rw-r--r-- 1 hduser hadoop 2412 May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop    4 May  1 09:46 edits
+-rw-r--r-- 1 hduser hadoop  100 May  1 09:46 VERSION
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary/current$ hadoop jar hadoop-examples-1.2.1.jar pi 4 4
+Not a valid JAR: /app/hadoop/tmp/dfs/namesecondary/current/hadoop-examples-1.2.1.jar
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary/current$ cd ..
+hduser@ubuntu:/app/hadoop/tmp/dfs/namesecondary$ cd ..
+hduser@ubuntu:/app/hadoop/tmp/dfs$ cd na
+-bash: cd: na: No such file or directory
+hduser@ubuntu:/app/hadoop/tmp/dfs$ cd name
+hduser@ubuntu:/app/hadoop/tmp/dfs/name$ cd current/
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltr
+total 1044
+-rw-r--r-- 1 hduser hadoop    2412 May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop       8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop     100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop    2186 May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop 1048580 May  1 10:35 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltrh
+total 1.1M
+-rw-r--r-- 1 hduser hadoop 2.4K May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop  100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop 2.2K May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop 1.1M May  1 10:35 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ cat fsimage.txt
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:26 /
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:55 /AVD
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:23 /aj
+drwxr-xr-x  -   hduser supergroup          0 2022-04-28 20:21 /app
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:26 /avd2
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 04:25 /tron
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /user
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:14 /AVD/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:23 /aj/samplefile1
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:25 /app/hadoop
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:26 /app/hadoop/tmp
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred
+drwxr-xr-x  -   hduser supergroup          0 2022-04-28 20:21 /app/hadoop/tmp/mapred/staging
+drwx------  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred/system
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred/staging/hduser
+drwx------  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred/staging/hduser/.staging
+-rw-------  1   hduser supergroup          4 2022-05-01 06:36 /app/hadoop/tmp/mapred/system/jobtracker.info
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /user/hduser
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 06:20 /user/hduser/.Trash
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 04:32 /user/hduser/AVD
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:15 /user/hduser/aj
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:41 /user/hduser/avd
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:17 /user/hduser/go
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:17 /user/hduser/tron
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 04:32 /user/hduser/AVD/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:15 /user/hduser/aj/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 04:35 /user/hduser/go/samplefile1
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltrh
+total 1.1M
+-rw-r--r-- 1 hduser hadoop 2.4K May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop  100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop 2.2K May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop 1.1M May  1 10:35 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -mkdir /tr1
+^[[Ahduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -mkdir /tr1
+mkdir: cannot create directory /tr1: File exists
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -mkdir /tr2
+^[[Ahduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -mkdir /tr2
+mkdir: cannot create directory /tr2: File exists
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -mkdir /tr3
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -mkdir /tr4
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltrh
+total 1.1M
+-rw-r--r-- 1 hduser hadoop 2.4K May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop  100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop 2.2K May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop 1.1M May  1 10:43 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltrh
+total 1.1M
+-rw-r--r-- 1 hduser hadoop 2.4K May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop  100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop 2.2K May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop 1.1M May  1 10:43 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -mkdir /tr5
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop fs -mkdir /tr6
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltrh
+total 1.1M
+-rw-r--r-- 1 hduser hadoop 2.4K May  1 09:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 09:46 fstime
+-rw-r--r-- 1 hduser hadoop  100 May  1 09:46 VERSION
+-rw-r--r-- 1 hduser hadoop 2.2K May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop 1.1M May  1 10:44 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ cd ../../../..
+hduser@ubuntu:/app/hadoop$ cd ../..
+hduser@ubuntu:/$ cd
+hduser@ubuntu:~$ cd /usr/loca;/hadoop
+-bash: cd: /usr/loca: No such file or directory
+-bash: /hadoop: No such file or directory
+hduser@ubuntu:~$ cd /usr/local/hadoop
+hduser@ubuntu:/usr/local/hadoop$ ls -ltr
+total 8392
+drwxr-xr-x  3 hduser hadoop    4096 Jul 22  2013 share
+drwxr-xr-x 10 hduser hadoop    4096 Jul 22  2013 contrib
+drwxr-xr-x  9 hduser hadoop    4096 Jul 22  2013 webapps
+-rw-rw-r--  1 hduser hadoop  385634 Jul 22  2013 hadoop-tools-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop 3126576 Jul 22  2013 hadoop-test-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop     417 Jul 22  2013 hadoop-minicluster-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop  142726 Jul 22  2013 hadoop-examples-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop 4203147 Jul 22  2013 hadoop-core-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop     414 Jul 22  2013 hadoop-client-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop    6842 Jul 22  2013 hadoop-ant-1.2.1.jar
+-rw-rw-r--  1 hduser hadoop    1366 Jul 22  2013 README.txt
+-rw-rw-r--  1 hduser hadoop     101 Jul 22  2013 NOTICE.txt
+-rw-rw-r--  1 hduser hadoop   13366 Jul 22  2013 LICENSE.txt
+-rw-rw-r--  1 hduser hadoop   10525 Jul 22  2013 ivy.xml
+-rw-rw-r--  1 hduser hadoop  493744 Jul 22  2013 CHANGES.txt
+drwxr-xr-x  4 hduser hadoop    4096 Jul 22  2013 c++
+-rw-rw-r--  1 hduser hadoop  121130 Jul 22  2013 build.xml
+drwxr-xr-x  6 hduser hadoop    4096 Apr 22 03:28 docs
+drwxr-xr-x  2 hduser hadoop    4096 Apr 22 03:28 ivy
+drwxr-xr-x  5 hduser hadoop    4096 Apr 22 03:28 lib
+drwxr-xr-x 16 hduser hadoop    4096 Apr 22 03:28 src
+drwxr-xr-x  2 hduser hadoop    4096 Apr 22 03:28 libexec
+drwxr-xr-x  2 hduser hadoop    4096 Apr 22 03:28 bin
+drwxr-xr-x  2 hduser hadoop    4096 Apr 22 03:28 sbin
+drwxr-xr-x  2 hduser hadoop    4096 May  1 06:35 conf
+drwxr-xr-x  4 hduser hadoop    4096 May  1 10:34 logs
+hduser@ubuntu:/usr/local/hadoop$ hadoop jar hadoop-examples-1.2.1.jar pi 4 4
+Number of Maps  = 4
+Samples per Map = 4
+Wrote input for Map #0
+Wrote input for Map #1
+Wrote input for Map #2
+Wrote input for Map #3
+Starting Job
+22/05/01 10:47:10 INFO mapred.FileInputFormat: Total input paths to process : 4
+22/05/01 10:47:10 INFO mapred.JobClient: Running job: job_202205010621_0003
+22/05/01 10:47:11 INFO mapred.JobClient:  map 0% reduce 0%
+22/05/01 10:47:17 INFO mapred.JobClient:  map 25% reduce 0%
+22/05/01 10:47:18 INFO mapred.JobClient:  map 50% reduce 0%
+22/05/01 10:47:25 INFO mapred.JobClient:  map 100% reduce 0%
+22/05/01 10:47:30 INFO mapred.JobClient:  map 100% reduce 33%
+22/05/01 10:47:32 INFO mapred.JobClient:  map 100% reduce 100%
+22/05/01 10:47:33 INFO mapred.JobClient: Job complete: job_202205010621_0003
+22/05/01 10:47:33 INFO mapred.JobClient: Counters: 30
+22/05/01 10:47:33 INFO mapred.JobClient:   Map-Reduce Framework
+22/05/01 10:47:33 INFO mapred.JobClient:     Spilled Records=16
+22/05/01 10:47:33 INFO mapred.JobClient:     Map output materialized bytes=112
+22/05/01 10:47:33 INFO mapred.JobClient:     Reduce input records=8
+22/05/01 10:47:33 INFO mapred.JobClient:     Virtual memory (bytes) snapshot=9167695872
+22/05/01 10:47:33 INFO mapred.JobClient:     Map input records=4
+22/05/01 10:47:33 INFO mapred.JobClient:     SPLIT_RAW_BYTES=496
+22/05/01 10:47:33 INFO mapred.JobClient:     Map output bytes=72
+22/05/01 10:47:33 INFO mapred.JobClient:     Reduce shuffle bytes=112
+22/05/01 10:47:33 INFO mapred.JobClient:     Physical memory (bytes) snapshot=825430016
+22/05/01 10:47:33 INFO mapred.JobClient:     Map input bytes=96
+22/05/01 10:47:33 INFO mapred.JobClient:     Reduce input groups=8
+22/05/01 10:47:33 INFO mapred.JobClient:     Combine output records=0
+22/05/01 10:47:33 INFO mapred.JobClient:     Reduce output records=0
+22/05/01 10:47:33 INFO mapred.JobClient:     Map output records=8
+22/05/01 10:47:33 INFO mapred.JobClient:     Combine input records=0
+22/05/01 10:47:33 INFO mapred.JobClient:     CPU time spent (ms)=3560
+22/05/01 10:47:33 INFO mapred.JobClient:     Total committed heap usage (bytes)=628097024
+22/05/01 10:47:33 INFO mapred.JobClient:   File Input Format Counters 
+22/05/01 10:47:33 INFO mapred.JobClient:     Bytes Read=472
+22/05/01 10:47:33 INFO mapred.JobClient:   FileSystemCounters
+22/05/01 10:47:33 INFO mapred.JobClient:     HDFS_BYTES_READ=968
+22/05/01 10:47:33 INFO mapred.JobClient:     FILE_BYTES_WRITTEN=274636
+22/05/01 10:47:33 INFO mapred.JobClient:     FILE_BYTES_READ=94
+22/05/01 10:47:33 INFO mapred.JobClient:     HDFS_BYTES_WRITTEN=215
+22/05/01 10:47:33 INFO mapred.JobClient:   File Output Format Counters 
+22/05/01 10:47:33 INFO mapred.JobClient:     Bytes Written=97
+22/05/01 10:47:33 INFO mapred.JobClient:   Job Counters 
+22/05/01 10:47:33 INFO mapred.JobClient:     Launched map tasks=4
+22/05/01 10:47:33 INFO mapred.JobClient:     Launched reduce tasks=1
+22/05/01 10:47:33 INFO mapred.JobClient:     SLOTS_MILLIS_REDUCES=13996
+22/05/01 10:47:33 INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0
+22/05/01 10:47:33 INFO mapred.JobClient:     SLOTS_MILLIS_MAPS=25809
+22/05/01 10:47:33 INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0
+22/05/01 10:47:33 INFO mapred.JobClient:     Data-local map tasks=4
+Job Finished in 23.622 seconds
+Estimated value of Pi is 3.75000000000000000000
+hduser@ubuntu:/usr/local/hadoop$ cdv ../../..
+
+Command 'cdv' not found, did you mean:
+
+  command 'udv' from deb ncbi-tools-x11 (6.1.20170106+dfsg1-8)
+  command 'cdb' from deb tinycdb (0.78build1)
+  command 'cde' from deb cde (0.1+git9-g551e54d-1.1build1)
+  command 'cdo' from deb cdo (1.9.9~rc1-1)
+  command 'cdw' from deb cdw (0.8.1-1build4)
+  command 'cd5' from deb cd5 (0.1-4)
+  command 'ddv' from deb ncbi-tools-x11 (6.1.20170106+dfsg1-8)
+  command 'cdi' from deb cdo (1.9.9~rc1-1)
+  command 'cdp' from deb irpas (0.10-7)
+
+Try: sudo apt install <deb name>
+
+hduser@ubuntu:/usr/local/hadoop$ cd ../../..
+hduser@ubuntu:/$ cd
+hduser@ubuntu:~$ cd /app/local
+-bash: cd: /app/local: No such file or directory
+hduser@ubuntu:~$ cd /app/hadoop
+hduser@ubuntu:/app/hadoop$ ls -ltr
+total 4
+drwxrwxrwx 4 hduser hadoop 4096 May  1 10:47 tmp
+hduser@ubuntu:/app/hadoop$ cd tmp
+hduser@ubuntu:/app/hadoop/tmp$ ls -ltr
+total 8
+drwxr-xr-x 5 hduser hadoop 4096 Apr 22 04:02 dfs
+drwxr-xr-x 3 hduser hadoop 4096 Apr 22 04:02 mapred
+hduser@ubuntu:/app/hadoop/tmp$ cd dfs
+hduser@ubuntu:/app/hadoop/tmp/dfs$ ls -ltr
+total 12
+drwxr-xr-x 5 hduser hadoop 4096 May  1 06:21 name
+drwxr-xr-x 6 hduser hadoop 4096 May  1 06:36 data
+drwxr-xr-x 4 hduser hadoop 4096 May  1 10:46 namesecondary
+hduser@ubuntu:/app/hadoop/tmp/dfs$ cd name
+hduser@ubuntu:/app/hadoop/tmp/dfs/name$ ls -ltr
+total 12
+drwxr-xr-x 2 hduser hadoop 4096 Apr 22 04:00 image
+drwxr-xr-x 2 hduser hadoop 4096 May  1 06:19 previous.checkpoint
+-rw-r--r-- 1 hduser hadoop    0 May  1 06:21 in_use.lock
+drwxr-xr-x 2 hduser hadoop 4096 May  1 10:46 current
+hduser@ubuntu:/app/hadoop/tmp/dfs/name$ cd current/
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltr
+total 1044
+-rw-r--r-- 1 hduser hadoop    2186 May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop    3168 May  1 10:46 fsimage
+-rw-r--r-- 1 hduser hadoop       8 May  1 10:46 fstime
+-rw-r--r-- 1 hduser hadoop     100 May  1 10:46 VERSION
+-rw-r--r-- 1 hduser hadoop 1048580 May  1 10:47 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltrh
+total 1.1M
+-rw-r--r-- 1 hduser hadoop 2.2K May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop 3.1K May  1 10:46 fsimage
+-rw-r--r-- 1 hduser hadoop    8 May  1 10:46 fstime
+-rw-r--r-- 1 hduser hadoop  100 May  1 10:46 VERSION
+-rw-r--r-- 1 hduser hadoop 1.1M May  1 10:47 edits
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ hadoop
+Usage: hadoop [--config confdir] COMMAND
+where COMMAND is one of:
+  namenode -format     format the DFS filesystem
+  secondarynamenode    run the DFS secondary namenode
+  namenode             run the DFS namenode
+  datanode             run a DFS datanode
+  dfsadmin             run a DFS admin client
+  mradmin              run a Map-Reduce admin client
+  fsck                 run a DFS filesystem checking utility
+  fs                   run a generic filesystem user client
+  balancer             run a cluster balancing utility
+  oiv                  apply the offline fsimage viewer to an fsimage
+  fetchdt              fetch a delegation token from the NameNode
+  jobtracker           run the MapReduce job Tracker node
+  pipes                run a Pipes job
+  tasktracker          run a MapReduce task Tracker node
+  historyserver        run job history servers as a standalone daemon
+  job                  manipulate MapReduce jobs
+  queue                get information regarding JobQueues
+  version              print the version
+  jar <jar>            run a jar file
+  distcp <srcurl> <desturl> copy file or directories recursively
+  distcp2 <srcurl> <desturl> DistCp version 2
+  archive -archiveName NAME -p <parent path> <src>* <dest> create a hadoop archive
+  classpath            prints the class path needed to get the
+                       Hadoop jar and the required libraries
+  daemonlog            get/set the log level for each daemon
+ or
+  CLASSNAME            run the class named CLASSNAME
+Most commands print help when invoked w/o parameters.
+
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ ls -ltr
+total 1048
+-rw-r--r-- 1 hduser hadoop    2186 May  1 10:14 fsimage.txt
+-rw-r--r-- 1 hduser hadoop    3168 May  1 10:46 fsimage
+-rw-r--r-- 1 hduser hadoop       8 May  1 10:46 fstime
+-rw-r--r-- 1 hduser hadoop     100 May  1 10:46 VERSION
+-rw-r--r-- 1 hduser hadoop 1048580 May  1 10:47 edits
+-rw-r--r-- 1 hduser hadoop    2892 May  1 10:50 fsimage1.txt
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ cat fsimage1.txt
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:44 /
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:55 /AVD
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:23 /aj
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:25 /app
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:26 /avd2
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:43 /tr1
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:43 /tr2
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:43 /tr3
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:43 /tr4
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:43 /tr5
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:44 /tr6
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:02 /transaction1
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:02 /transaction2
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:02 /transaction3
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:02 /transaction4
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 04:25 /tron
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /user
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:14 /AVD/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:23 /aj/samplefile1
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:26 /app/hadoop
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred/staging
+drwx------  -   hduser supergroup          0 2022-05-01 10:35 /app/hadoop/tmp/mapred/system
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 07:00 /app/hadoop/tmp/mapred/staging/hduser
+drwx------  -   hduser supergroup          0 2022-05-01 10:35 /app/hadoop/tmp/mapred/staging/hduser/.staging
+-rw-------  1   hduser supergroup          4 2022-05-01 06:36 /app/hadoop/tmp/mapred/system/jobtracker.info
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 10:35 /user/hduser
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 06:20 /user/hduser/.Trash
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 04:32 /user/hduser/AVD
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:15 /user/hduser/aj
+drwxr-xr-x  -   hduser supergroup          0 2022-05-01 06:41 /user/hduser/avd
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:17 /user/hduser/go
+drwxr-xr-x  -   hduser supergroup          0 2022-04-23 05:17 /user/hduser/tron
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 04:32 /user/hduser/AVD/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 05:15 /user/hduser/aj/samplefile1
+-rw-r--r--  1   hduser supergroup         28 2022-04-23 04:35 /user/hduser/go/samplefile1
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ history
+    1  cd /home/hduser/.ssh
+    2  ls -ltr
+    3  ssh localhost
+    4  sudo vi /etc/sysctl.conf
+    5  sudo nano /etc/sysctl.conf
+    6  cat /proc/sys/net/ipv6/conf/all/disable_ipv6
+    7  sudo reboot
+    8  id
+    9  id hduser
+   10  sudo apt install openssh-server
+   11  ssh-keygen -t rsa -p  ""
+   12  ssh-keygen -t rsa -p ""
+   13  ssh-keygen -t rsa -p""
+   14  ssh-keygen -t rsa -P ""
+   15  cd /home/hduser/.ssh
+   16  ls -ltr
+   17  cat id_rsa.pu
+   18  cat id_rsa.pub
+   19  cat id_rsa.pub >> authorized_keys
+   20  ls -ltr
+   21  chmod 700 authorized_keys
+   22  ls -ltr
+   23  ssh localhost
+   24  logout
+   25  cd /usr/local/hadoop/bin
+   26  hadoop
+   27  hadoop namenode -format
+   28  ls -ltr
+   29  ./start-all.sh
+   30  jps
+   31  stop-all.sh
+   32  logout
+   33  pwd
+   34  cd /usr/local
+   35  cd /usr/local/
+   36  pwd
+   37  sudo wget https://archive.apache.org/dist/hadoop/core/hadoop-1.2.1/hadoop-1.2.1.tar.gz
+   38  ls -ltr
+   39  hadoop tar -xzvf hadoop-1.2.1.tar.gz
+   40  sudo hadoop tar -xzvf hadoop-1.2.1.tar.gz
+   41  sudo tar -xzvf hadoop-1.2.1.tar.gz
+   42  ls -ltr
+   43  sudo chown -R hduser:hadoop hadoop-1.2.1
+   44  ls -ltr
+   45  sudo mv hadoop-1.2.1 hadoop
+   46  ls -ltr
+   47  cd hadoop/
+   48  ls -ltr
+   49  cd conf/
+   50  cd conf
+   51  cd ..
+   52  cd conf
+   53  ls -ltr
+   54  pwd
+   55  echo $JAVA_HOME
+   56  sudo nano hadoop-env.sh
+   57  sudo nano ~/.bashrc
+   58  source ~/.bashrc
+   59  hadoop
+   60  hadoop version
+   61  sudo nano core-site.xml
+   62  sudo nano mapred-site.xml
+   63  sudo nano hdfs-site.xml
+   64  sudo nano mapred-site.xml
+   65  sudo nano core-site.xml
+   66  sudo nano hdfs-site.xml
+   67  cat core-site.xml
+   68  sudo mkdir -p /app/hadoop/tmp
+   69  cd /app
+   70  ls -ltr
+   71  sudo chown -R hduser:hadoop /app
+   72  ls -ltr
+   73  cd tmp
+   74  cd /tmp
+   75  ls -ltr
+   76  cd ..
+   77  cd /app/hadoop/tmp
+   78  ls -ltr
+   79  cd ..
+   80  ls -ltr
+   81  cd /tmp
+   82  cd /app/hadoop/tmp
+   83  ls -ltr
+   84  sudo chmod -R 777 /app/hadoop/tmp/
+   85  ls -ltr
+   86  logout
+   87  start-all.sh
+   88  jps
+   89  logout
+   90  claer
+   91  jps
+   92  start-all.sh
+   93  jps
+   94  stop-all.sh
+   95  jps
+   96  logout
+   97  hadoop fs -lsr
+   98  cd /usr/local/hadoop/conf
+   99  hadoop fs -lsr
+  100  cd ..
+  101  start-all.sh
+  102  hadoop fs -lsr
+  103  hadoop fs -lsr /usr
+  104  hadoop fs -ls /usr
+  105  hadoop fs -ls /
+  106  ls -ltr
+  107  stop-all.sh
+  108  clear
+  109  start-all.sh
+  110  hadoop fs -ls /
+  111  hadoop fs -lsr /
+  112  hadoop fs -mkdir  AVD
+  113  hadoop fs -lsr /
+  114  hadoop fs -mkdir  /AVD
+  115  hadoop fs -lsr /
+  116  pwd
+  117  hadoop fs -lsr 
+  118  hadoop fs -lsr /
+  119  hadoop fs -lsr 
+  120  hadoop fs -mkdir aj
+  121  hadoop fs -lsr 
+  122  hadoop fs -mkdir /aj
+  123  hadoop fs -lsr /
+  124  cd /
+  125  pwd
+  126  hadoop fs -lsr 
+  127  cd ..
+  128  hadoop fs -lsr 
+  129  pwd
+  130  cd ..
+  131  pwd
+  132  cd /
+  133  cd ..
+  134  cd .
+  135  exit
+  136  pwd
+  137  tree
+  138  clear
+  139  jps
+  140  stop-all.sh
+  141  logout
+  142  clear
+  143  hadoop fs -ls
+  144  clear
+  145  start-all.sh
+  146  hadoop fs -ls
+  147  hadoop fs -lsr
+  148  hadoop fs -lsr /
+  149  clear
+  150  hadoop fs -lsr /
+  151  hadoop fs -mkdir /tron
+  152  hadoop fs -lsr /
+  153  hadoop fs -ls /
+  154  hadoop fs -mkdir tron
+  155  hadoop fs -ls /
+  156  hadoop fs -lsr
+  157  pwd
+  158  sudo nano samplefile1
+  159  hadoop fs -ls 
+  160  hadoop fs -ls /
+  161  hadoop fs -lsr /
+  162  ls -ltr
+  163  nano samplefil1 
+  164  ls -ltr
+  165  hadoop fs -lsr /
+  166  hadoop fs -help put
+  167  hadoop fs -put /home/hduser/samplefile1 /user/hduser/AVD
+  168  hadoop fs -lsr /
+  169  hadoop fs -cat /user/hduser/AVD/samplefile1
+  170  hadoop fs -cat samplefile1
+  171  cat samplefile1
+  172  hadoop fs -copyFromLocal /home/hduser/samplefile1 /user/hduser/tron
+  173  hadoop fs -lsr /
+  174  hadoop fs -cat /user/hduser/tron/samplefile1
+  175  hadoop fs -copyFromLocal /home/hduser/samplefile1 /aj
+  176  hadoop fs -lsr /
+  177  /user/hduser/aj
+  178  cd /user/hduser/aj
+  179  cd /user
+  180  cd user
+  181  cd /aj
+  182  pwd
+  183  cd user
+  184  cd user/
+  185  cd /user
+  186  cd /user/hduser/aj
+  187  clear
+  188  cd /user/hduser/aj
+  189  cd user
+  190  cd hduser
+  191  cd /hduser
+  192  clear
+  193  hadoop fs -lsr /
+  194  cd /AVD
+  195  hadoop fs -help
+  196  clear
+  197  hadoop fs -lsr /
+  198  pwd
+  199  cd /aj
+  200  hadoop fs -ls /aj
+  201  pwd
+  202  hadoop fs -lsr /
+  203  hadoop fs -lsr 
+  204  du
+  205  hadoop fs -lsr /
+  206  hadoop fs -ls /aj
+  207  hadoop fs -get /aj/samplefile1 /tmp
+  208  hadoop fs -ls /tmp
+  209  hadoop fs -lsr /tmp
+  210  hadoop fs -ls /aj
+  211  cd /tmp
+  212  ls -ltr
+  213  hadoop fs -get /aj/samplefile1 /home/hduser/AVD
+  214  cd /home/hduser
+  215  ls -ltr
+  216  cat samplefile1
+  217  hadoop fs -help cp
+  218  hadoop fs -cp /user/hduser/tron/samplefile1
+  219  hadoop fs -cp /user/hduser/tron/samplefile1 /aj
+  220  hadoop fs -lsr /
+  221  hadoop fs -cp /user/hduser/tron/samplefile1 /user/hduser/aj
+  222  hadoop fs -lsr /
+  223  hadoop fs -mkdir go
+  224  hadoop fs -lsr /
+  225  hadoop fs -mv /user/hduser/tron/samplefile1 /user/hduser/go
+  226  hadoop fs -lsr /
+  227  hadoop fs -count /app
+  228  hadoop fs -count /
+  229  hadoop fs -count /user
+  230  cd /user/local/hadop/conf
+  231  cd /user/local/hadoop/conf
+  232  cd /user
+  233  cd user
+  234  cd /usr/local/hadoop/conf
+  235  ls -ltr
+  236  jps
+  237  hadoop fs -rm /aj/samplefile1
+  238  hadoop fs -lsr /
+  239  hadoop fs -cp /user/hduser/.Trash/Current/aj/samplefile1  /aj/samplefile1
+  240  hadoop fs -lsr /
+  241  hadoop fs -lsr /.Trash
+  242  hadoop fs -lsr /.Trash/current
+  243  hadoop fs -lsr /user/hduser/.Trash/Current
+  244  hadoop fs -mv /user/hduser/.Trash/Current/aj/samplefile1  /aj/samplefile1
+  245  hadoop fs -mv /user/hduser/.Trash/Current/aj/samplefile1  /AVD
+  246  hadoop fs -lsr /
+  247  ls -ltr
+  248  hadoop fs -rmr -skiptrash 
+  249  cd ../..
+  250  cd 
+  251  hadoop fs -rm /AVD/samplefile1
+  252  hadoop fs -mv /user/hduser/.Trash/Current/AVD/samplefile1  /AVD/samplefile1
+  253  hadoop fs -lsr /
+  254  hadoop fs -mv /user/hduser/.Trash/Current/AVD/samplefile1  /AVD
+  255  hadoop fs -mv /user/hduser/.Trash/Current/AVD/samplefile1 /AVD
+  256  hadoop fs -mv /user/hduser/.Trash/Current/AVD/samplefile1 /app
+  257  hadoop fs -mv /user/hduser/.Trash/Current/AVD/samplefile1 /app/
+  258  hadoop fs -mv /user/hduser/.Trash/Current/AVD/samplefile1 /AVD/samplefile1
+  259  hadoop fs -help get
+  260  hadoop fs -help put
+  261  stop-all.sh
+  262  jps
+  263  logout
+  264  clear
+  265  hadoop fs -lsr /
+  266  clear
+  267  start-all.sh
+  268  hadoop fs -lsr /
+  269  stop-all.sh
+  270  ls -ltr
+  271  hadoop fs
+  272  start-all.sh
+  273  jps
+  274  cd /usr/local/hadoop
+  275  ls -ltr
+  276  hadoop jar hadoop-examples-1.2.1.jar pi 2 2
+  277  exit
+  278  ls -ltr
+  279  start-all.sh
+  280  jps
+  281  hadoop fs -mkdir /avd2
+  282  jps
+  283  stop-all.sh
+  284  jps
+  285  start-all.sh
+  286  jps
+  287  hadoop dfsmin -safemode get
+  288  hadoop dfsadmin -safemode get
+  289  hadoop fs -mkdir /avd2
+  290  hadoop dfsadmin -safemode enter
+  291  hadoop dfsadmin -safemode get
+  292  hadoop dfsadmin -safemode leave
+  293  hadoop fs -mkdir /avd2
+  294  jps
+  295  ./hadoop-daemon.sh start datanode
+  296  cd usr
+  297  cd usr/
+  298  cd usr/local
+  299  lsn -ltr
+  300  ls -ltr
+  301  pwd
+  302* 
+  303  cd /usr/local/
+  304  ls -ltr
+  305  cd /usr/local/hadoop
+  306  ls -ltr
+  307  cd /usr/local/hadoop/conf
+  308  ls -ltr
+  309  sudo nano core-site.xml
+  310  sudo nano hdfs-site.xml
+  311  sudo nano hadoop-env.sh
+  312  start-all.sh
+  313  jps
+  314  cd ../../../..
+  315  cd
+  316  hadoop fs -ls /
+  317  hadoop fs -mkdir avd
+  318  hadoop fs -ls 
+  319  cd /usr/local/hadoop
+  320  ls -ltr
+  321  cd /etc
+  322  cd /usr/local/hadoop
+  323  cd share/
+  324  ls -ltr
+  325  cd hadoop/
+  326  ls -ltr
+  327  cd ../..
+  328  ls -ltr
+  329  hadoop jar hadoop-examples-1.2.1.jar pi 2 2
+  330  cd ../..
+  331  cd ..
+  332  cd 
+  333  hadoop fs -ls
+  334  hadoop fs -ls /
+  335  start-all.sh
+  336  jps
+  337  hadoop fs -mkdir /transaction1
+  338  hadoop fs -mkdir /transaction2
+  339  hadoop fs -mkdir /transaction3
+  340  hadoop fs -mkdir /transaction4
+  341  cd /app/hadoop
+  342  ls -ltr
+  343  cd tmp/
+  344  cd dfs
+  345  cd name/current/
+  346  ls -ltr
+  347  ls -ltrh
+  348  hadoop fs -cat /app/hadoop/tmp/dfs/name/current/fsimage
+  349  hadoop fs -cat /fsimage
+  350  hadoop fs -cat fsimage
+  351  hadoop fs -help
+  352  hadoop 
+  353  hadoop oiv 
+  354  ls -ltr
+  355  hadoop oiv -i fsimage -o fsimage.txt
+  356  ls -ltr
+  357  hadoop fs -cat fsimage.txt
+  358  cat fsimage.txt
+  359  hadoop jar hadoop-examples-1.2.1.jar pi 3
+  360  hadoop jar hadoop-examples-1.2.1.jar pi 3 3
+  361  ls -ltr
+  362  cd ../..
+  363  ls -ltr
+  364  cd namesecondary/
+  365  ls -ltr
+  366  cd current/
+  367  ls -ltr
+  368  cd ../..
+  369  ls -ltr
+  370  cd ..
+  371  ls -ltr
+  372  cd ..
+  373  ls -ltr
+  374  cd ../..
+  375  cd
+  376  cd /usr/local
+  377  ls -ltr
+  378  cd hadoop
+  379  ls -ltr
+  380  sudo jar hadoop-examples-1.2.1.jar
+  381  sudo jar hadoop-examples-1.2.1.jar pi 3 3
+  382  hadoop jar hadoop-examples-1.2.1.jar pi 3 3
+  383  cd /app/hadoop
+  384  ls -ltr
+  385  cd tmp/
+  386  ls -ltr
+  387  cd dfs/
+  388  ls -ltr
+  389  cd namesecondary/
+  390  ls -ltr
+  391  cd current/
+  392  ls -ltr
+  393  hadoop jar hadoop-examples-1.2.1.jar pi 4 4
+  394  cd ..
+  395  cd na
+  396  cd name
+  397  cd current/
+  398  ls -ltr
+  399  ls -ltrh
+  400  cat fsimage.txt
+  401  ls -ltrh
+  402  hadoop fs -mkdir /tr1
+  403  hadoop fs -mkdir /tr2
+  404  hadoop fs -mkdir /tr3
+  405  hadoop fs -mkdir /tr4
+  406  ls -ltrh
+  407  hadoop fs -mkdir /tr5
+  408  hadoop fs -mkdir /tr6
+  409  ls -ltrh
+  410  cd ../../../..
+  411  cd ../..
+  412  cd
+  413  cd /usr/loca;/hadoop
+  414  cd /usr/local/hadoop
+  415  ls -ltr
+  416  hadoop jar hadoop-examples-1.2.1.jar pi 4 4
+  417  cdv ../../..
+  418  cd ../../..
+  419  cd
+  420  cd /app/local
+  421  cd /app/hadoop
+  422  ls -ltr
+  423  cd tmp
+  424  ls -ltr
+  425  cd dfs
+  426  ls -ltr
+  427  cd name
+  428  ls -ltr
+  429  cd current/
+  430  ls -ltr
+  431  ls -ltrh
+  432  hadoop
+  433  hadoop oiv -i fsimage -o fsimage1.txt\
+  434  ls -ltr
+  435  cat fsimage1.txt
+  436  history
+hduser@ubuntu:/app/hadoop/tmp/dfs/name/current$ 
+

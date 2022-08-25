@@ -1,0 +1,75 @@
+hive partitioning-
+To organize the table data into slices and optimize the
+query we use partitioning
+step1- create a staging table 
+step2- load the data into staging table.
+step3- creating Sa partitioning table using one or 
+more than one column.
+step4- load the data into partition table 
+step5- two types of partition
+static and dynamic.
+================================================
+Staging table syntax- 
+create table scorecard_nopartition 
+(sid int, 
+ eng_score int,
+ science_score int,
+ arts_score int,
+ semester int,
+ location varchar(3)
+)
+row format delimited 
+fields terminated by ','
+;
+
+==================================================
+
+insert overwrite table India partition(state='ANDHRA PRADESH') 
+select office_name,office_status,pincode,telephone,taluk,district,postal_division,postal_region,postal_circle from temp_India where state='ANDHRA PRADESH';
+
+Assignment:april 30
+What is partitioning in Hive
+What is static partition
+what is dynamic partition
+when to use static and when to use dynamic partitions;
+
+======================
+Create External tables 
+
+
+create external table scorecard_ext 
+(sid int, 
+ eng_score int,
+ science_score int,
+ arts_score int,
+ semester string
+)
+partitioned by (location varchar(3))
+row format delimited 
+fields terminated by ','
+location '/locations'
+;
+------------------
+Adding partitions to external tables
+
+ALTER TABLE scorecard_ext 
+add partition (location = 'NY')
+location '/locations/NY';
+
+ALTER TABLE scorecard_ext 
+add partition (location = 'OK')
+location '/locations/OK';
+
+#Modifying partitions in hive 
+
+ALTER TABLE scorecard_ext
+partition (location = 'NY')
+set location '/locations/Newyork';
+
+#Dropping partitions
+
+ALTER TABLE scorecard_ext
+drop if exists partition(location = 'NY');
+
+
+https://www.javatpoint.com/hive-load-data

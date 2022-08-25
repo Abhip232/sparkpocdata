@@ -1,0 +1,23 @@
+refrence tables count
+
+
+[cloudera@localhost sqoop_project]$ cat hive_count.txt 
+ADDRESS_hive:	25
+CITY_hive:	17
+COUNTRY_hive:	8
+DEPARTMENT_hive:    10
+DISEASE_hive:	11
+DOCTOR_hive:	10
+E_ADDRESS_hive:	150
+HOSPITAL_hive:	10
+POLICY_hive:	6
+STATE_hive:	15
+TEST_hive:	11
+
+
+transaction table count
+
+[cloudera@localhost sqoop_project]$ cat hive_trans_count.txt 
+BILLING_hive:	15
+CLAIM_hive:	11
+STAFF_hive:	25

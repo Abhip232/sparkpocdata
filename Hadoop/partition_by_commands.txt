@@ -1,0 +1,56 @@
+Hive partioining steps:
+step 1: create a temporary or staging table
+step 2: load the data into temporary table 
+step 3: create a partition table 
+step 4: 2 types of partitions are available in hive
+static partition 
+dynamic partition
+============================================
+step 1:  temporary table
+create table scorecard_nopartition
+(
+sid int,
+eng_score int,
+maths_score int,
+arts_score int,
+semester string,
+location varchar(4)
+)
+row format delimited
+fields terminated by ',';
+
+
+create partitiontable:
+
+create table scorecard_partition
+(
+sid int,
+eng_score int,
+maths_score int,
+arts_score int,
+semester string
+
+)
+partitioned by (location varchar(4))
+row format delimited
+fields terminated by ',';
+
+load data local inpath '/home/hduser/scorecard_NY' into table scorecard_partition
+partition(location = 'NY');
+
+load data local inpath '/home/hduser/scorecard_OK' into table scorecard_partition
+partition(location = 'OK');
+
+++++++++++++++++
+Dynamic Partition
+hive> 
+hive> set hive.exec.dynamic.partition;
+hive.exec.dynamic.partition=true
+hive> set hive.exec.dynamic.partition.mode;
+hive.exec.dynamic.partition.mode=strict
+hive> set hive.exec.dynamic.partition.mode=nonstrict;
+hive> set hive.exec.dynamic.partition.mode;
+hive.exec.dynamic.partition.mode=nonstrict
+hive> 
+
+

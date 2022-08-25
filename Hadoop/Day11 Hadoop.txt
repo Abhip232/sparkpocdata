@@ -1,0 +1,86 @@
+Hive Partition steps;
+
+1. Create a temporary or staging table.
+2. Load the data into temporary table.
+3. Create a partition table.
+4. Two types of partition are available in hive.
+	a. Static Partition
+	b. Dynamic Partition.
+===============================================================================
+--step 1 ---temporary table
+>>create table scorecard_nopartition
+(sid int,
+ eng_score int,
+ maths_score int,
+ arts_score int,
+ semester string,
+ location varchar(8)
+)
+row format delimited
+fields terminated by ',';
+
+--step 2 --create partition table
+>>create table scorecard_partition
+(sid int,
+ eng_score int,
+ maths_score int,
+ arts_score int,
+ semester string
+)
+partitioned by (location varchar(8))
+row format delimited
+fields terminated by ',';
+
+-step 3 load data from local to hive
+>>load data local inpath '/home/hduser/scorecard_NY' into table scorecard_partition
+partition
+ >partition(location = 'NY' );
+
+>>load data local inpath '/home/hduser/scorecard_OK' into table scorecard_partition
+partition
+ >partition(location = 'OK' )
+
+
+======partitioned external tables---
+create external table scorecard_ext
+(sid int,
+ eng_score int,
+ maths_score int,
+ arts_score int,
+ semester string
+)
+partitioned by (location varchar(8))
+row format delimited
+fields terminated by ','
+location '/countrynames';
+
+--adding partitions to an external tables
+ALTER TABLE tablename 
+add partition(column1)
+location 'hdfs location';
+
+ALTER TABLE scorecard_ext 
+add partition(location = 'NY')
+location '/countrynames/NY';
+
+ALTER TABLE scorecard_ext 
+add partition(location = 'OK')
+location '/countrynames/OK';
+
+
+--Modifying Partitions in HIVE
+
+ALTER TABLE scorecard_ext 
+ partition(location = 'NY')
+set location '/countrynames/NewYork';
+
+--Dropping Partition
+
+ALTER TABLE scorecard_ext 
+drop if exists partition(location = 'OK');
+
+
+--------------------------------
+--bucketing in hive
+
+
